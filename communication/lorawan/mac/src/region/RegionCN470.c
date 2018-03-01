@@ -29,6 +29,19 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 #include "Region.h"
 #include "RegionCommon.h"
 #include "RegionCN470.h"
+#include "service_debug.h"
+
+#define REGION_CN470_DEBUG
+#ifdef  REGION_CN470_DEBUG
+#define REGION_CN470_DEBUG(...)  do {DEBUG(__VA_ARGS__);}while(0)
+#define REGION_CN470_DEBUG_D(...)  do {DEBUG_D(__VA_ARGS__);}while(0)
+#define REGION_CN470_DEBUG_DUMP DEBUG_DUMP
+#else
+#define REGION_CN470_DEBUG(...)
+#define REGION_CN470_DEBUG_D(...)
+#define REGION_CN470_DEBUG_DUMP
+#endif
+
 
 // Definitions
 #define CHANNELS_MASK_SIZE              6
@@ -115,7 +128,14 @@ static uint8_t CountNbOfEnabledChannels( uint8_t datarate, uint16_t* channelsMas
                 if( RegionCommonValueInRange( datarate, channels[i + j].DrRange.Fields.Min,
                                               channels[i + j].DrRange.Fields.Max ) == false )
                 { // Check if the current channel selection supports the given datarate
-                    continue;
+                    //lz-modify
+                    if(UseLoRaWanStandardProtocol())
+                    {
+                        REGION_CN470_DEBUG("region eu470 datarate is not supported\r\n");
+                        continue;
+                    }
+                    //end===
+                    /* continue; */
                 }
                 if( bands[channels[i + j].Band].TimeOff > 0 )
                 { // Check if the band is available for transmission
@@ -294,17 +314,24 @@ void RegionCN470InitDefaults( InitType_t type )
             for( uint8_t i = 0; i < CN470_MAX_NB_CHANNELS; i++ )
             {
                 Channels[i].Frequency = 470300000 + i * 200000;
-                Channels[i].DrRange.Value = ( DR_5 << 4 ) | DR_0;
+                /* Channels[i].DrRange.Value = ( DR_5 << 4 ) | DR_0; */
+                Channels[i].DrRange.Value = ( DR_5 << 4 ) | DR_5;
                 Channels[i].Band = 0;
             }
 
             // Initialize the channels default mask
-            ChannelsDefaultMask[0] = 0xFFFF;
-            ChannelsDefaultMask[1] = 0xFFFF;
-            ChannelsDefaultMask[2] = 0xFFFF;
-            ChannelsDefaultMask[3] = 0xFFFF;
-            ChannelsDefaultMask[4] = 0xFFFF;
-            ChannelsDefaultMask[5] = 0xFFFF;
+            /* ChannelsDefaultMask[0] = 0xFFFF; */
+            /* ChannelsDefaultMask[1] = 0xFFFF; */
+            /* ChannelsDefaultMask[2] = 0xFFFF; */
+            /* ChannelsDefaultMask[3] = 0xFFFF; */
+            /* ChannelsDefaultMask[4] = 0xFFFF; */
+            /* ChannelsDefaultMask[5] = 0xFFFF; */
+            ChannelsDefaultMask[0] = 0x2;
+            ChannelsDefaultMask[1] = 0x0;
+            ChannelsDefaultMask[2] = 0x0;
+            ChannelsDefaultMask[3] = 0x0;
+            ChannelsDefaultMask[4] = 0x0;
+            ChannelsDefaultMask[5] = 0x0;
 
             // Update the channels mask
             RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 6 );
@@ -485,6 +512,12 @@ bool RegionCN470RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     phyDr = DataratesCN470[dr];
 
     Radio.SetChannel( frequency );
+#if 0 
+    REGION_CN470_DEBUG("rx freq=%d\r\n",frequency);
+    REGION_CN470_DEBUG("bandwidth = %d\r\n",rxConfig->Bandwidth);
+    REGION_CN470_DEBUG("datarate = %d\r\n",phyDr);
+    REGION_CN470_DEBUG("rxContinuous = %d\r\n",rxConfig->RxContinuous);
+#endif
 
     // Radio configuration
     Radio.SetRxConfig( MODEM_LORA, rxConfig->Bandwidth, phyDr, 1, 0, 8, rxConfig->WindowTimeout, false, 0, false, 0, 0, true, rxConfig->RxContinuous );
@@ -514,6 +547,11 @@ bool RegionCN470TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
 
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
+#if 1
+    REGION_CN470_DEBUG("loramac tx frequency = %d\r\n",Channels[txConfig->Channel].Frequency);
+    REGION_CN470_DEBUG("tx power=%d\r\n",phyTxPower);
+    REGION_CN470_DEBUG("datarate=%d\r\n",phyDr);
+#endif
 
     Radio.SetTxConfig( MODEM_LORA, phyTxPower, 0, 0, phyDr, 1, 8, false, true, 0, 0, false, 3000 );
     // Setup maximum payload lenght of the radio driver
@@ -754,6 +792,13 @@ bool RegionCN470NextChannel( NextChanParams_t* nextChanParams, uint8_t* channel,
     {
         // We found a valid channel
         *channel = enabledChannels[randr( 0, nbEnabledChannels - 1 )];
+        //lz-modify add
+        if(!UseLoRaWanStandardProtocol())
+        {
+            REGION_CN470_DEBUG("region cn470 select datarate\r\n");
+            LoRaMacParams.ChannelsDatarate = randr( Channels[*channel].DrRange.Fields.Min, Channels[*channel].DrRange.Fields.Max );
+        }
+        //======
 
         *time = 0;
         return true;

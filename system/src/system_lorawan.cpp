@@ -258,6 +258,7 @@ static void MlmeConfirm( MlmeConfirm_t *mlmeConfirm )
             if( mlmeConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK )
             {
                 // Status is OK, node has joined the network
+                #if 0
                 if(!System.featureEnabled(SYSTEM_FEATURE_STANDARD_LORAWAN_ENABLED)){
                     uint16_t channelMask = 0;
                     uint8_t lastChannel = LoRaMacGetLastTxChannel();
@@ -273,6 +274,7 @@ static void MlmeConfirm( MlmeConfirm_t *mlmeConfirm )
                     LoRaMacMibSetRequestConfirm( &mibReq );
                     SLORAWAN_DEBUG("lorawan close other channel\r\n");
                 }
+                #endif
 
                 LoRaWanOnEvent(LORAWAN_EVENT_JOINED);
                 if(!System.featureEnabled(SYSTEM_FEATURE_SEND_INFO_ENABLED)){
@@ -392,7 +394,8 @@ void LoRaWanResume(void)
     LoRaMacPrimitives.MacMcpsIndication = McpsIndication;
     LoRaMacPrimitives.MacMlmeConfirm = MlmeConfirm;
     LoRaMacCallbacks.GetBatteryLevel = BoardGetBatteryLevel;
-    LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_EU433);
+    // LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_EU433);
+    LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_CN470);
 
     DEBUG("loramac init!!!\r\n");
     DEBUG("sync word = 0x%x\r\n",SX1276Read(0x39));

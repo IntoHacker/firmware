@@ -1968,7 +1968,7 @@ static LoRaMacStatus_t ScheduleTx( void )
     // Select channel
     while( RegionNextChannel( LoRaMacRegion, &nextChan, &Channel, &dutyCycleTimeOff, &AggregatedTimeOff ) == false )
     {
-        LORAMAC_DEBUG("ScheduleTx Select channel\r\n");
+        /* LORAMAC_DEBUG("ScheduleTx Select channel\r\n"); */
         // Set the default datarate
         LoRaMacParams.ChannelsDatarate = LoRaMacParamsDefaults.ChannelsDatarate;
         // Update datarate in the function parameters
