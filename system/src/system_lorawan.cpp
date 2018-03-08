@@ -580,17 +580,17 @@ void intorobot_lorawan_send_terminal_info(void)
         }
         SLORAWAN_DEBUG_D("\r\n");
 
-        if(LoRaWan.sendConfirmed(2, buffer, index, 150) == 0){
+        //if(LoRaWan.sendConfirmed(2, buffer, index, 150) == 0){
             INTOROBOT_LORAWAN_CONNECTED = true;
             INTOROBOT_LORAWAN_SEND_INFO = false;
             LoRaWan._macRunStatus = ep_lorawan_join_success;
             system_notify_event(event_lorawan_status,ep_lorawan_join_success);
             system_rgb_blink(RGB_COLOR_WHITE, 2000);//白灯闪烁
             DEBUG("termianal info send ok\r\n");
-        }else{
-            DEBUG("termianal info send fail\r\n");
-            INTOROBOT_LORAWAN_SEND_INFO = false;
-        }
+        //}else{
+         //   DEBUG("termianal info send fail\r\n");
+          //  INTOROBOT_LORAWAN_SEND_INFO = false;
+        //}
     }else{
         INTOROBOT_LORAWAN_CONNECTED = true;
     }

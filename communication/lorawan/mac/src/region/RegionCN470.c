@@ -326,7 +326,7 @@ void RegionCN470InitDefaults( InitType_t type )
             /* ChannelsDefaultMask[3] = 0xFFFF; */
             /* ChannelsDefaultMask[4] = 0xFFFF; */
             /* ChannelsDefaultMask[5] = 0xFFFF; */
-            ChannelsDefaultMask[0] = 0x2;
+            ChannelsDefaultMask[0] = 0x1;
             ChannelsDefaultMask[1] = 0x0;
             ChannelsDefaultMask[2] = 0x0;
             ChannelsDefaultMask[3] = 0x0;
@@ -512,7 +512,7 @@ bool RegionCN470RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     phyDr = DataratesCN470[dr];
 
     Radio.SetChannel( frequency );
-#if 0 
+#if 0
     REGION_CN470_DEBUG("rx freq=%d\r\n",frequency);
     REGION_CN470_DEBUG("bandwidth = %d\r\n",rxConfig->Bandwidth);
     REGION_CN470_DEBUG("datarate = %d\r\n",phyDr);
